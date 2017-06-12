@@ -1,0 +1,29 @@
+var fs = require("fs");
+
+var filename = "./css.txt";
+var changedFile = "./changedFile.js";
+var text = fs.readFileSync(filename,'utf8');
+var n = 1;
+function changeToJQ (str) {
+    str="$('"+str.replace(/\n/,"");
+	//防止出现有些CSS不以;结束
+    str = str[str.indexOf("}")-1]==";"?str:str.replace("\}",";}");
+    var str_pre = str.substr(0,str.indexOf("{"));
+    var str_aft = str.substr(str.indexOf("{")).replace(/\{/,("').css({"+'"'))
+                .replace(/:/g,'":"')
+                .replace(/;/g,'","').replace(/,"\}/,'})');
+    return str_pre+str_aft;
+}
+
+fs.open(changedFile,'a',function(err,fd){
+	text.split(/\n/).forEach(function(line){
+		console.log(changeToJQ(line));
+		// (changeToJQ(line))
+		fs.write(fd,(changeToJQ(line)+";\n"),function(err){
+			if (err) throw err;
+			console.log('文件定稿正确'+(n++));
+		})
+		// fs.writeFileSync(changedFile,"fuck","utf8");
+	})
+})
+
